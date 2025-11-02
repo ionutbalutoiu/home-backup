@@ -1,0 +1,16 @@
+name: Home Backup Container Image
+
+on:
+  push:
+    tags:
+      - "[0-9]+.[0-9]+.[0-9]+"
+      - "[0-9]+.[0-9]+.[0-9]+-*"
+
+jobs:
+  container-image:
+    uses: balutoiu/gha-utils/.github/workflows/docker-buildx.yaml@dev
+    with:
+      image_name: home-backup
+      context: ./projects/home-backup
+      platforms: linux/amd64, linux/arm64
+    secrets: inherit
