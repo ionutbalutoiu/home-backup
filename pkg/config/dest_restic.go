@@ -2,8 +2,7 @@ package config
 
 import (
 	"fmt"
-
-	"gopkg.in/yaml.v3"
+	"strconv"
 )
 
 type DestResticParams struct {
@@ -12,13 +11,19 @@ type DestResticParams struct {
 }
 
 func (d *DestResticParams) ParseParams(params map[string]string) error {
-	bytes, err := yaml.Marshal(params)
-	if err != nil {
-		return err
+	// repo
+	if repo, ok := params["repo"]; ok {
+		d.Repo = repo
 	}
-	if err := yaml.Unmarshal(bytes, d); err != nil {
-		return err
+	// keep_last
+	if keepLastStr, ok := params["keep_last"]; ok {
+		keepLast, err := strconv.Atoi(keepLastStr)
+		if err != nil {
+			return fmt.Errorf("invalid int value for 'keep_last': %v", err)
+		}
+		d.KeepLast = keepLast
 	}
+	// validate params
 	if err := d.validate(); err != nil {
 		return err
 	}
