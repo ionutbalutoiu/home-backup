@@ -1,4 +1,4 @@
-FROM golang:1.25.3-alpine AS build
+FROM golang:1.25.5-alpine AS build
 
 ARG RCLONE_VERSION="1.71.2"
 ARG RESTIC_VERSION="0.18.1"
