@@ -1,7 +1,7 @@
 package backup
 
 import (
-	"github.com/balutoiu/home-backup/pkg/config"
+	"github.com/ionutbalutoiu/home-backup/pkg/config"
 
 	log "github.com/sirupsen/logrus"
 )

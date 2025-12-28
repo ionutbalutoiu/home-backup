@@ -3,7 +3,7 @@ package backup
 import (
 	"fmt"
 
-	"github.com/balutoiu/home-backup/pkg/config"
+	"github.com/ionutbalutoiu/home-backup/pkg/config"
 )
 
 type DestinationBackup interface {

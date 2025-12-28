@@ -1,4 +1,4 @@
-module github.com/balutoiu/home-backup
+module github.com/ionutbalutoiu/home-backup
 
 go 1.25.3
 

@@ -8,7 +8,7 @@ on:
 
 jobs:
   container-image:
-    uses: balutoiu/gha-utils/.github/workflows/docker-buildx.yaml@main
+    uses: ionutbalutoiu/gha-utils/.github/workflows/docker-buildx.yaml@main
     with:
       image_name: home-backup
       context: .

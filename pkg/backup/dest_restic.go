@@ -3,8 +3,8 @@ package backup
 import (
 	"fmt"
 
-	"github.com/balutoiu/home-backup/internal/utils"
-	"github.com/balutoiu/home-backup/pkg/config"
+	"github.com/ionutbalutoiu/home-backup/internal/utils"
+	"github.com/ionutbalutoiu/home-backup/pkg/config"
 
 	log "github.com/sirupsen/logrus"
 )

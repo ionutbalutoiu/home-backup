@@ -18,10 +18,10 @@ RUN ARCH=$(uname -m) && \
     bzip2 -d /restic-${RESTIC_VERSION}-linux-${ARCH}.bz2 && \
     install -m 0755 /restic-${RESTIC_VERSION}-linux-${ARCH} /usr/local/bin/restic
 
-WORKDIR /go/src/github.com/balutoiu/home-backup/
+WORKDIR /go/src/github.com/ionutbalutoiu/home-backup/
 COPY . .
 
-WORKDIR /go/src/github.com/balutoiu/home-backup/build/
+WORKDIR /go/src/github.com/ionutbalutoiu/home-backup/build/
 RUN go build -o ./home-backup ../cmd/home-backup
 
 FROM alpine:3.22.2
@@ -30,7 +30,7 @@ RUN apk add --no-cache lvm2 lvm2-extra util-linux device-mapper
 RUN apk add --no-cache btrfs-progs xfsprogs xfsprogs-extra e2fsprogs e2fsprogs-extra
 RUN apk add --no-cache ca-certificates
 
-COPY --from=build /go/src/github.com/balutoiu/home-backup/build/home-backup /usr/local/bin/home-backup
+COPY --from=build /go/src/github.com/ionutbalutoiu/home-backup/build/home-backup /usr/local/bin/home-backup
 COPY --from=build /usr/local/bin/rclone /usr/local/bin/rclone
 COPY --from=build /usr/local/bin/restic /usr/local/bin/restic
 
