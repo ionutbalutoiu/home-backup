@@ -9,6 +9,9 @@ on:
 jobs:
   container-image:
     uses: ionutbalutoiu/gha-utils/.github/workflows/docker-buildx.yaml@main
+    permissions:
+      contents: read
+      packages: write
     with:
       image_name: home-backup
       context: .
