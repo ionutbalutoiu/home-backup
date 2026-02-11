@@ -1,4 +1,4 @@
-FROM golang:1.25.7-alpine AS build
+FROM golang:1.26.0-alpine AS build
 
 # renovate: datasource=github-releases depName=rclone packageName=rclone/rclone
 ARG RCLONE_VERSION="1.73.0"
