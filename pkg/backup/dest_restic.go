@@ -54,7 +54,7 @@ func (r *ResticDestinationBackup) Create(ctx context.Context, backupPath string)
 	}
 	log.Debug("pruning old restic backups")
 	cmd = utils.ExternalCommand{
-		Command: []string{"restic", "--repo", r.Params.Repo, "forget", "--keep-last", fmt.Sprintf("%d", r.Params.KeepLast), "--prune"},
+		Command: []string{"restic", "--repo", r.Params.Repo, "forget", "--group-by", r.Params.GroupBy, "--keep-last", fmt.Sprintf("%d", r.Params.KeepLast), "--prune"},
 	}
 	if _, err := utils.ExecCommand(ctx, cmd); err != nil {
 		return fmt.Errorf("failed to prune old restic backups: %w", err)

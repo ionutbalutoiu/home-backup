@@ -6,10 +6,12 @@ import (
 )
 
 const defaultKeepLast = 10
+const defaultGroupBy = "host"
 
 type DestResticParams struct {
 	Repo     string `yaml:"repo"`
 	KeepLast int    `yaml:"keep_last,omitempty"`
+	GroupBy  string `yaml:"group_by,omitempty"`
 }
 
 func (d *DestResticParams) ParseParams(params map[string]string) error {
@@ -23,6 +25,9 @@ func (d *DestResticParams) ParseParams(params map[string]string) error {
 		}
 		d.KeepLast = keepLast
 	}
+	if groupBy, ok := params["group_by"]; ok {
+		d.GroupBy = groupBy
+	}
 	d.setDefaults()
 	if err := d.validate(); err != nil {
 		return err
@@ -33,6 +38,9 @@ func (d *DestResticParams) ParseParams(params map[string]string) error {
 func (d *DestResticParams) setDefaults() {
 	if d.KeepLast == 0 {
 		d.KeepLast = defaultKeepLast
+	}
+	if d.GroupBy == "" {
+		d.GroupBy = defaultGroupBy
 	}
 }
 

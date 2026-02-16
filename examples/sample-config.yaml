@@ -9,6 +9,7 @@ backups:
     destination:
       type: restic
       repo: <RESTIC_REPO>
+      # group_by: host  # optional, default: "host"
   #
   # Directory --> Restic
   #
@@ -18,3 +19,4 @@ backups:
     destination:
       type: restic
       repo: <RESTIC_REPO>
+      # group_by: host  # optional, default: "host"
