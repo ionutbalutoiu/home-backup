@@ -30,8 +30,8 @@ func (s *SrcDirectoryParams) validate() error {
 		return fmt.Errorf("directory source 'path' parameter is required")
 	}
 	stat, err := os.Stat(s.Path)
-	if os.IsNotExist(err) {
-		return fmt.Errorf("directory source 'path' does not exist: %s", s.Path)
+	if err != nil {
+		return fmt.Errorf("directory source 'path' is not accessible: %w", err)
 	}
 	if !stat.IsDir() {
 		return fmt.Errorf("directory source 'path' is not a directory: %s", s.Path)

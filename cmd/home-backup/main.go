@@ -1,8 +1,11 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/ionutbalutoiu/home-backup/pkg/backup"
 	"github.com/ionutbalutoiu/home-backup/pkg/config"
@@ -42,7 +45,10 @@ func main() {
 		log.Fatalf("error loading config file: %v\n", err)
 	}
 
-	if err := backup.CreateBackups(cfg); err != nil {
+	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGTERM, syscall.SIGINT)
+	defer stop()
+
+	if err := backup.CreateBackups(ctx, cfg); err != nil {
 		log.Fatalf("error performing backups: %v\n", err)
 	}
 }

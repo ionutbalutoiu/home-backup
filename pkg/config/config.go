@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"io"
 	"os"
 
@@ -22,19 +23,19 @@ func LoadConfig(filePath string) (*Config, error) {
 	log.Debugf("loading configuration from: %s", filePath)
 	file, err := os.Open(filePath)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("opening config file %q: %w", filePath, err)
 	}
 	defer file.Close()
 
 	data, err := io.ReadAll(file)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("reading config file %q: %w", filePath, err)
 	}
 
 	log.Debugf("unmarshalling configuration data from YAML")
 	var config Config
 	if err := yaml.Unmarshal(data, &config); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("parsing config file %q: %w", filePath, err)
 	}
 
 	return &config, nil

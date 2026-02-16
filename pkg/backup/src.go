@@ -1,35 +1,27 @@
 package backup
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/ionutbalutoiu/home-backup/pkg/config"
 )
 
 type SourceBackup interface {
-	Prepare() (backupPath string, err error)
-	Cleanup() (err error)
+	Prepare(ctx context.Context) (string, error)
+	Cleanup(ctx context.Context) error
 }
 
 func NewSourceBackup(params map[string]string) (SourceBackup, error) {
 	if _, ok := params["type"]; !ok {
 		return nil, fmt.Errorf("missing source backup 'type' parameter")
 	}
-	var srcBackup SourceBackup
-	var err error
 	switch params["type"] {
 	case config.TypeLVM:
-		srcBackup, err = NewLVMSourceBackup(params)
-		if err != nil {
-			return nil, fmt.Errorf("failed to create LVM source backup: %v", err)
-		}
+		return NewLVMSourceBackup(params)
 	case config.TypeDirectory:
-		srcBackup, err = NewDirectorySourceBackup(params)
-		if err != nil {
-			return nil, fmt.Errorf("failed to create Directory source backup: %v", err)
-		}
+		return NewDirectorySourceBackup(params)
 	default:
 		return nil, fmt.Errorf("unsupported source backup type: %s", params["type"])
 	}
-	return srcBackup, nil
 }
