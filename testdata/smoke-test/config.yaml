@@ -1,0 +1,8 @@
+backups:
+  - source:
+      type: directory
+      path: /test/source-data
+    destination:
+      type: restic
+      repo: /tmp/restic-repo
+      keep_last: "3"
