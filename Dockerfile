@@ -28,7 +28,7 @@ COPY . .
 WORKDIR /go/src/github.com/ionutbalutoiu/home-backup/build/
 RUN go build -ldflags="-s -w" -trimpath -o ./home-backup ../cmd/home-backup
 
-FROM alpine:3.23.3
+FROM alpine:3.23.4
 
 RUN apk add --no-cache \
     lvm2 lvm2-extra util-linux device-mapper \
