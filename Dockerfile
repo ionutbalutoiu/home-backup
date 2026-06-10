@@ -3,7 +3,7 @@ FROM golang:1.26.4-alpine AS build
 # renovate: datasource=github-releases depName=rclone packageName=rclone/rclone
 ARG RCLONE_VERSION="1.74.3"
 # renovate: datasource=github-releases depName=restic packageName=restic/restic
-ARG RESTIC_VERSION="0.18.1"
+ARG RESTIC_VERSION="0.19.0"
 
 RUN apk add --no-cache curl unzip
 
