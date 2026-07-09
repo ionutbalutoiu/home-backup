@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-home-backup is a Go CLI tool that automates home server backup operations. It reads a YAML config file describing backup jobs (each with a source and destination) and executes them. It must run as root. The tool is containerized and published as a multi-arch Docker image (amd64/arm64).
+home-backup is a Go CLI tool that automates home server backup operations. It reads a strict, typed YAML config describing source-to-destination jobs and executes them sequentially. Directory jobs can run unprivileged; LVM jobs require root. The tool is containerized and published as a multi-arch Docker image (amd64/arm64).
 
 ## Platform
 
@@ -19,32 +19,42 @@ GOOS=linux go build -o ./build/home-backup ./cmd/home-backup
 # Build Docker image
 docker build -t home-backup .
 
-# Run tests (none exist yet, but standard Go test command)
-GOOS=linux go test ./...
+# Run tests and static checks on Linux
+go test ./...
+go vet ./...
 
-# Vet / format
-GOOS=linux go vet ./...
+# Format
 gofmt -l .
 ```
 
+On a non-Linux host, run tests and vet inside a Linux Go container; setting
+`GOOS=linux` locally cross-compiles test binaries but cannot execute them.
+
 ## Architecture
 
-The codebase follows an interface-based plugin pattern for backup sources and destinations:
+This is an application-only module. Sources and destinations are compile-time
+extensions composed explicitly by the application, not third-party runtime
+plugins.
 
-- **`cmd/home-backup/main.go`** — Entry point: parses `-config` flag, loads YAML config, calls `backup.CreateBackups()`
-- **`pkg/config/`** — YAML config loading. Source/destination params are parsed as `map[string]string` and validated into typed param structs (`SrcLVMParams`, `SrcDirectoryParams`, `DestResticParams`)
-- **`pkg/backup/`** — Core backup logic with two interfaces:
-  - `SourceBackup` (`Prepare() string`, `Cleanup() error`) — prepares a filesystem path to back up. Implementations: `LVMSourceBackup` (creates LVM snapshot, mounts it), `DirectorySourceBackup` (returns path as-is)
-  - `DestinationBackup` (`Create(backupPath string) error`) — performs the backup. Implementation: `ResticDestinationBackup` (runs restic backup + prune)
-  - Factory functions `NewSourceBackup()` / `NewDestinationBackup()` switch on the `type` parameter
-- **`internal/utils/`** — Shared utilities: command execution, mount/unmount (via syscall), filesystem type detection (via blkid), file existence checks
+- **`cmd/home-backup/main.go`** — Process lifecycle only: signal context, standard streams, and exit status.
+- **`internal/app/`** — Composition root and CLI option parsing. This is the only package that selects concrete source and destination adapters.
+- **`internal/config/`** — Strict YAML decoding into typed source and destination variants, plus defaults and structural validation. YAML nodes do not escape this package.
+- **`internal/backup/`** — Workflow contracts (`Job`, `Source`, `Input`, and `Destination`), the local job lifecycle, and the sequential engine.
+- **`internal/command/`** — Structured `os/exec` boundary with separate stdout/stderr capture and typed exit errors.
+- **`internal/directory/`** — Directory source adapter.
+- **`internal/lvm/`** — Linux-only LVM snapshot source and read-only system mounter.
+- **`internal/restic/`** — Restic destination adapter and retention sequence.
 
-**Backup flow:** For each job: source.Prepare() → destination.Create(path) → source.Cleanup(). LVM sources create a temporary snapshot, mount it read-only, back it up, then clean up the snapshot.
+**Backup flow:** `Source.Open` → `Destination.Backup(input.Path())` →
+`Input.Release`. Cleanup uses an uncancelled, bounded context and joins cleanup
+errors with backup errors. Per-run LVM state belongs to the returned input, not
+the reusable source.
 
 ## Key Dependencies
 
-- `github.com/sirupsen/logrus` — structured logging
-- `gopkg.in/yaml.v3` — config parsing
+- Go standard library `log/slog` — structured logging
+- `gopkg.in/yaml.v3` — strict config parsing
+- `golang.org/x/sys/unix` — Linux mount and unmount syscalls
 - External binaries at runtime: `restic`, `rclone` (bundled in Docker image), LVM tools (`lvcreate`, `lvremove`)
 
 ## CI/CD
@@ -53,7 +63,7 @@ GitHub Actions workflow (`.github/workflows/home-backup.yaml`) triggers on semve
 
 ## Adding New Source/Destination Types
 
-1. Add a type constant in `pkg/config/constants.go`
-2. Create a params struct in `pkg/config/` with validation
-3. Implement the `SourceBackup` or `DestinationBackup` interface in `pkg/backup/`
-4. Register it in the corresponding factory function (`NewSourceBackup` or `NewDestinationBackup`)
+1. Add the typed configuration variant and strict decoder fields in `internal/config`.
+2. Implement `backup.Source` or `backup.Destination` in a focused adapter package.
+3. Add the explicit construction case in `internal/app/wiring.go`.
+4. Add decoder, adapter, wiring, and lifecycle tests. Do not introduce a registry, dependency-injection framework, or runtime plugin mechanism.
