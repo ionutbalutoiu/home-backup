@@ -33,3 +33,9 @@ go.work.sum
 
 # Build dir
 build
+
+# Local Git worktrees
+.worktrees/
+
+# Superpowers docs
+docs/superpowers/
